@@ -2,75 +2,183 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+/*
+|--------------------------------------------------------------------------
+| PARTE 1: ESTRUCTURAS GLOBALES Y TABLAS DINÁMICAS
+|--------------------------------------------------------------------------
+*/
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
-});
+// Ejercicio 1: Catálogo de Clientes VIP (Uso de Objetos e Interpolación Básica)
+Route::get('/clientes/vip', function () {
+    // 1. Crear un arreglo que contenga un mínimo de 3 objetos usando (object)[...]
+    $clientes = [
+        (object)[
+            'id' => 1, 
+            'nombre' => 'Carlos Mendoza', 
+            'telefono' => '7744-1234', 
+            'puntos_altruistas' => 150
+        ],
+        (object)[
+            'id' => 2, 
+            'nombre' => 'Ana Beatriz Ramos', 
+            'telefono' => '2255-6789', 
+            'puntos_altruistas' => 320
+        ],
+        (object)[
+            'id' => 3, 
+            'nombre' => 'Roberto Flores', 
+            'telefono' => '6100-4321', 
+            'puntos_altruistas' => 95
+        ]
+    ];
 
-require __DIR__.'/settings.php';
+    // 2. Lógica de Renderizado: Estructura de la tabla en la variable $html
+    $html = "<h2>Catálogo de Clientes VIP</h2>";
+    $html .= "<table border='1' cellpadding='10' cellspacing='0' style='border-collapse: collapse;'>";
+    $html .= "<thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Teléfono</th>
+                    <th>Puntos Altruistas</th>
+                </tr>
+              </thead>";
+    $html .= "<tbody>";
 
-
-// --- RUTA DE CATEGORÍAS ---
-Route::get('/categorias', function () {
-    $categorias = json_decode(json_encode([
-        ["codigo" => "A02", "categoria" => "Medicamentos para el tratamiento de Trastornos causados por Ácidos"],
-        ["codigo" => "A03", "categoria" => "Medicamentos contra Trastornos Funcionales Gastrointestinales"],
-        ["codigo" => "A04", "categoria" => "Medicamentos Antieméticos y Antinauseosos"],
-        ["codigo" => "A06", "categoria" => "Medicamentos para el Estreñimiento"],
-        ["codigo" => "A07", "categoria" => "Medicamentos Antidiarreicos, Antiinflamatorios y Antiinfecciosos Intestinales"],
-        ["codigo" => "A10", "categoria" => "Medicamentos usados en Diabetes"],
-        ["codigo" => "A11", "categoria" => "Vitaminas"],
-        ["codigo" => "A12", "categoria" => "Suplementos Minerales"]
-    ]));
-
-    $html = "<h2>Listado de Categorías</h2>";
-    $html .= "<table border='1' cellpadding='5' cellspacing='0'>";
-    $html .= "<thead><tr><th>CÓDIGO</th><th>CATEGORÍA</th></tr></thead><tbody>";
-
-    foreach ($categorias as $cat) {
-        $html .= "<tr><td>{$cat->codigo}</td><td>{$cat->categoria}</td></tr>";
-    }
-
-    $html .= "</tbody></table>";
-    return $html;
-});
-
-// --- RUTA DE MEDICAMENTOS ---
-Route::get('/medicamentos', function () {
-    $medicamentos = json_decode(json_encode([
-        ["codigo" => "A02BA02", "num" => "1", "nombre" => "Ranitidina", "dosis" => "50 mg", "forma" => "Líquidos parenterales", "via" => "IM/IV"],
-        ["codigo" => "A02BA03", "num" => "2", "nombre" => "Famotidina", "dosis" => "40 mg", "forma" => "Sólidos orales", "via" => "VO"],
-        ["codigo" => "A02BC01", "num" => "3", "nombre" => "Omeprazol", "dosis" => "20 mg", "forma" => "Sólidos orales", "via" => "VO"],
-        ["codigo" => "A02BC01", "num" => "4", "nombre" => "Omeprazol", "dosis" => "40 mg", "forma" => "Sólidos parenterales", "via" => "IV"],
-        ["codigo" => "A03BA01", "num" => "1", "nombre" => "Atropina (Sulfato)", "dosis" => "0.5-1 mg/mL", "forma" => "Líquidos parenterales", "via" => "SC/IM/IV"],
-        ["codigo" => "A03BA03", "num" => "2", "nombre" => "Hiosciamina (bromuro de n-butil hioscina)", "dosis" => "10 mg", "forma" => "Sólidos orales", "via" => "VO"],
-        ["codigo" => "A03BA03", "num" => "3", "nombre" => "Hiosciamina (bromuro de n-butil hioscina)", "dosis" => "20 mg/mL", "forma" => "Líquidos parenterales", "via" => "IM/IV"],
-        ["codigo" => "A03FA01", "num" => "4", "nombre" => "Metoclopramida (clorhidrato)", "dosis" => "5 mg/mL", "forma" => "Líquidos parenterales", "via" => "IM/IV"],
-        ["codigo" => "A03FA01", "num" => "5", "nombre" => "Metoclopramida (clorhidrato)", "dosis" => "10 mg", "forma" => "Sólidos orales", "via" => "VO"],
-        ["codigo" => "A04AA01", "num" => "1", "nombre" => "Ondansetron", "dosis" => "8 mg", "forma" => "Sólidos orales", "via" => "VO"],
-        ["codigo" => "A04AA01", "num" => "2", "nombre" => "Ondansetron", "dosis" => "2 mg/mL", "forma" => "Líquidos parenterales", "via" => "IV"],
-        ["codigo" => "A04AA02", "num" => "3", "nombre" => "Granisetron", "dosis" => "1 mg", "forma" => "Sólidos orales", "via" => "VO"],
-        ["codigo" => "A04AA02", "num" => "4", "nombre" => "Granisetron", "dosis" => "1 mg/mL", "forma" => "Líquidos parenterales", "via" => "IV"],
-        ["codigo" => "R06AA11", "num" => "5", "nombre" => "Dimenhidrinato", "dosis" => "50 mg", "forma" => "Sólidos orales", "via" => "VO"],
-        ["codigo" => "R06AA11", "num" => "6", "nombre" => "Dimenhidrinato", "dosis" => "50 mg/mL", "forma" => "Líquidos parenterales", "via" => "IM/IV"]
-    ]));
-
-    $html = "<h2>Listado de Medicamentos</h2>";
-    $html .= "<table border='1' cellpadding='5' cellspacing='0'>";
-    $html .= "<thead><tr><th>Código</th><th>№</th><th>Nombre</th><th>Dosis</th><th>Forma farmacéutica</th><th>Vía de administración</th></tr></thead><tbody>";
-
-    foreach ($medicamentos as $med) {
+    // Bucle foreach para recorrer los objetos e interpolar sus propiedades
+    foreach ($clientes as $cliente) {
         $html .= "<tr>
-                    <td>{$med->codigo}</td>
-                    <td>{$med->num}</td>
-                    <td>{$med->nombre}</td>
-                    <td>{$med->dosis}</td>
-                    <td>{$med->forma}</td>
-                    <td>{$med->via}</td>
+                    <td>{$cliente->id}</td>
+                    <td>{$cliente->nombre}</td>
+                    <td>{$cliente->telefono}</td>
+                    <td>{$cliente->puntos_altruistas}</td>
                   </tr>";
     }
 
-    $html .= "</tbody></table>";
-    return $html;
+    $html .= "</tbody>";
+    $html .= "</table>";
+
+    // 3. Al final, imprime la variable con un echo
+    echo $html;
+});
+
+
+// Ejercicio 2: Panel de Proveedores Internacionales
+Route::get('/proveedores/internacionales', function () {
+    // 1. Colección de objetos proveedores
+    $proveedores = [
+        (object)[
+            'empresa' => 'Pfizer Global', 
+            'pais_origen' => 'Estados Unidos', 
+            'medicamento_principal' => 'Lipitor', 
+            'tiempo_entrega_dias' => 10
+        ],
+        (object)[
+            'empresa' => 'Bayer AG', 
+            'pais_origen' => 'Alemania', 
+            'medicamento_principal' => 'Aspirina', 
+            'tiempo_entrega_dias' => 20 // Mayor a 15 para activar advertencia
+        ],
+        (object)[
+            'empresa' => 'Novartis', 
+            'pais_origen' => 'Suiza', 
+            'medicamento_principal' => 'Voltaren', 
+            'tiempo_entrega_dias' => 12
+        ]
+    ];
+
+    // 2. Almacenar en una variable todo el código
+    $tablaProveedores = "<h2>Panel de Proveedores Internacionales</h2>";
+    $tablaProveedores .= "<table border='1' cellpadding='10' cellspacing='0' style='border-collapse: collapse;'>";
+    $tablaProveedores .= "<thead>
+                            <tr>
+                                <th>Empresa</th>
+                                <th>País de Origen</th>
+                                <th>Medicamento Principal</th>
+                                <th>Tiempo de Entrega (Días)</th>
+                            </tr>
+                          </thead>";
+    $tablaProveedores .= "<tbody>";
+
+    foreach ($proveedores as $prov) {
+        // Lógica: Si tiempo_entrega_dias es mayor a 15, incluye advertencia de texto
+        $advertencia = "";
+        if ($prov->tiempo_entrega_dias > 15) {
+            $advertencia = " <b style='color: red;'>(Demora Crítica)</b>";
+        }
+
+        $tablaProveedores .= "<tr>
+                                <td>{$prov->empresa}</td>
+                                <td>{$prov->pais_origen}</td>
+                                <td>{$prov->medicamento_principal}</td>
+                                <td>{$prov->tiempo_entrega_dias}{$advertencia}</td>
+                              </tr>";
+    }
+
+    $tablaProveedores .= "</tbody>";
+    $tablaProveedores .= "</table>";
+
+    // 3. Todo el bloque debe imprimirse mediante un solo echo
+    echo $tablaProveedores;
+});
+
+
+// Ejercicio 3: Inventario Automatizado de Lotes de Medicamentos
+Route::get('/lotes/inventario', function () {
+    // 1. Arreglo de objetos que representa los lotes de la farmacia
+    $lotes = [
+        (object)[
+            'codigo_lote' => 'LOT-2026A', 
+            'nombre_medicamento' => 'Insulina Humana', 
+            'cantidad_cajas' => 50, 
+            'temperatura_requerida_celsius' => 4 // Menor o igual a 5°C
+        ],
+        (object)[
+            'codigo_lote' => 'LOT-2026B', 
+            'nombre_medicamento' => 'Paracetamol 500mg', 
+            'cantidad_cajas' => 200, 
+            'temperatura_requerida_celsius' => 22
+        ],
+        (object)[
+            'codigo_lote' => 'LOT-2026C', 
+            'nombre_medicamento' => 'Vacuna BCG', 
+            'cantidad_cajas' => 35, 
+            'temperatura_requerida_celsius' => 2 // Menor o igual a 5°C
+        ]
+    ];
+
+    $inventarioHtml = "<h2>Inventario Automatizado de Lotes de Medicamentos</h2>";
+    $inventarioHtml .= "<table border='1' cellpadding='10' cellspacing='0' style='border-collapse: collapse;'>";
+    $inventarioHtml .= "<thead>
+                            <tr>
+                                <th>Código Lote</th>
+                                <th>Medicamento</th>
+                                <th>Cantidad (Cajas)</th>
+                                <th>Temperatura Requerida</th>
+                            </tr>
+                          </thead>";
+    $inventarioHtml .= "<tbody>";
+
+    // 2. Lógica de Control: Al recorrer los objetos para armar la tabla HTML, evalúa la temperatura
+    foreach ($lotes as $lote) {
+        $nombreFinal = $lote->nombre_medicamento;
+
+        // Si la temperatura es menor o igual a 5°C, agrega la etiqueta
+        if ($lote->temperatura_requerida_celsius <= 5) {
+            $nombreFinal .= " <span style='color: blue; font-weight: bold;'>[Requiere Cadena de Frío]</span>";
+        }
+
+        $inventarioHtml .= "<tr>
+                                <td>{$lote->codigo_lote}</td>
+                                <td>{$nombreFinal}</td>
+                                <td>{$lote->cantidad_cajas}</td>
+                                <td>{$lote->temperatura_requerida_celsius}°C</td>
+                              </tr>";
+    }
+
+    $inventarioHtml .= "</tbody>";
+    $inventarioHtml .= "</table>";
+
+    // 3. Imprime el bloque final
+    echo $inventarioHtml;
 });
